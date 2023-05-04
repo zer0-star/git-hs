@@ -20,6 +20,14 @@ description: Please see the README on GitHub at <https://github.com/zer0-star/gi
 
 dependencies:
   - base >= 4.7 && < 5
+  - bytestring
+  - zlib
+  - SHA
+
+default-extensions:
+  - BlockArguments
+  - OverloadedStrings
+  - TypeApplications
 
 ghc-options:
   - -Wall
