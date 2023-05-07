@@ -24,8 +24,8 @@ source-repository head
 
 library
   exposed-modules:
-      Git.Object.Blob
-      Lib
+      Data.Git.Index
+      Data.Git.Object.Blob
   other-modules:
       Paths_git_hs
   hs-source-dirs:
@@ -33,33 +33,64 @@ library
   default-extensions:
       BlockArguments
       OverloadedStrings
-      TypeApplications
+      DeriveAnyClass
+      DerivingStrategies
+      OverloadedRecordDot
+      NoFieldSelectors
+      DuplicateRecordFields
+      MultiWayIf
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       SHA
     , base >=4.7 && <5
+    , binary
     , bytestring
+    , containers
+    , directory
+    , extra
+    , filepath
+    , flow
+    , mono-traversable
+    , time
+    , unix
     , zlib
-  default-language: Haskell2010
+  default-language: GHC2021
 
 executable git-hs
   main-is: Main.hs
   other-modules:
+      Command
+      Command.Add
       Paths_git_hs
   hs-source-dirs:
       app
   default-extensions:
       BlockArguments
       OverloadedStrings
-      TypeApplications
+      DeriveAnyClass
+      DerivingStrategies
+      OverloadedRecordDot
+      NoFieldSelectors
+      DuplicateRecordFields
+      MultiWayIf
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       SHA
     , base >=4.7 && <5
+    , binary
     , bytestring
+    , containers
+    , directory
+    , extra
+    , filepath
+    , flow
     , git-hs
+    , mono-traversable
+    , optparse-applicative
+    , time
+    , unix
     , zlib
-  default-language: Haskell2010
+  default-language: GHC2021
 
 test-suite git-hs-test
   type: exitcode-stdio-1.0
@@ -71,12 +102,26 @@ test-suite git-hs-test
   default-extensions:
       BlockArguments
       OverloadedStrings
-      TypeApplications
+      DeriveAnyClass
+      DerivingStrategies
+      OverloadedRecordDot
+      NoFieldSelectors
+      DuplicateRecordFields
+      MultiWayIf
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       SHA
     , base >=4.7 && <5
+    , binary
     , bytestring
+    , containers
+    , directory
+    , extra
+    , filepath
+    , flow
     , git-hs
+    , mono-traversable
+    , time
+    , unix
     , zlib
-  default-language: Haskell2010
+  default-language: GHC2021

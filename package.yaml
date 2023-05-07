@@ -23,11 +23,27 @@ dependencies:
   - bytestring
   - zlib
   - SHA
+  - binary
+  - mono-traversable
+  - unix
+  - time
+  - containers
+  - filepath
+  - flow
+  - directory
+  - extra
+
+default-language: GHC2021
 
 default-extensions:
   - BlockArguments
   - OverloadedStrings
-  - TypeApplications
+  - DeriveAnyClass
+  - DerivingStrategies
+  - OverloadedRecordDot
+  - NoFieldSelectors
+  - DuplicateRecordFields
+  - MultiWayIf
 
 ghc-options:
   - -Wall
@@ -53,6 +69,7 @@ executables:
       - -with-rtsopts=-N
     dependencies:
       - git-hs
+      - optparse-applicative
 
 tests:
   git-hs-test:

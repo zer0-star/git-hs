@@ -1,0 +1,38 @@
+{
+  "extensions": [
+    "BlockArguments",
+    "OverloadedStrings",
+    "TypeApplications",
+    "DeriveGeneric",
+    "DeriveAnyClass",
+    "DerivingStrategies",
+    "NamedFieldPuns",
+    "MultiWayIf"
+  ],
+  "style": "gibiansky",
+  "formatting": {
+    "indent": {
+      "where": 1,
+      "where-binds": "indent-by 1"
+    },
+    "op": {
+      ". in expression": {
+        "spaces": "none",
+        "linebreaks": "none",
+        "force-linebreak": false
+      }
+    },
+    "options": {
+      "sort-imports": [
+        {
+          "prefixes": [ "" ],
+          "order": "grouped"
+        },
+        {
+          "prefixes": [ "Data.Git" ],
+          "order": "sorted"
+        }
+      ]
+    }
+  }
+}
