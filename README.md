@@ -1,7 +1,27 @@
 # git-hs
-A toy git implementetaion written in haskell
+A toy git implementetaion written in Haskell
 
-## commands
+## Implementation status
+- [x] `git add`
+- [ ] `git commit`
+- [ ] `git merge`
+- [ ] `git push`
+- [ ] `git switch`
+- [ ] `git status`
+- [ ] `git log`
+
+## Build
+### with Nix
+```sh
+$ nix build
+```
+
+### with Cabal
+```sh
+$ cabal build
+```
+
+## Commands
 ### add
 
 ```
