@@ -39,13 +39,16 @@ library
       NoFieldSelectors
       DuplicateRecordFields
       MultiWayIf
+      RecordWildCards
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      SHA
-    , base >=4.7 && <5
-    , binary
+      base >=4.7 && <5
+    , base16-bytestring
+    , bytedump
+    , bytes
     , bytestring
     , containers
+    , cryptohash-sha1
     , directory
     , extra
     , filepath
@@ -73,13 +76,16 @@ executable git-hs
       NoFieldSelectors
       DuplicateRecordFields
       MultiWayIf
+      RecordWildCards
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      SHA
-    , base >=4.7 && <5
-    , binary
+      base >=4.7 && <5
+    , base16-bytestring
+    , bytedump
+    , bytes
     , bytestring
     , containers
+    , cryptohash-sha1
     , directory
     , extra
     , filepath
@@ -108,13 +114,16 @@ test-suite git-hs-test
       NoFieldSelectors
       DuplicateRecordFields
       MultiWayIf
+      RecordWildCards
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      SHA
-    , base >=4.7 && <5
-    , binary
+      base >=4.7 && <5
+    , base16-bytestring
+    , bytedump
+    , bytes
     , bytestring
     , containers
+    , cryptohash-sha1
     , directory
     , extra
     , filepath

@@ -1,22 +1,17 @@
-module Data.Git.Index
-    ( Index(..)
-    , IndexEntry(..)
-    , PaddedString(..)
-    , updateIndexWith) where
+module Data.Git.Index (Index(..), IndexEntry(..), updateIndexWith) where
 
 import           Control.Monad
 
-import qualified Data.Binary as B
-import qualified Data.Binary.Get as B
-import qualified Data.Binary.Put as B
-import qualified Data.ByteString.Lazy as L
-import           Data.Digest.Pure.SHA
+import qualified Data.ByteString as BS
+import           Data.ByteString (ByteString)
+import qualified Data.Bytes.Get as B
+import qualified Data.Bytes.Put as B
+import qualified Data.Bytes.Serial as B
+import           Data.Bytes.Serial (Serial(deserialize))
 import           Data.String
 import           Data.Word
 
 import           Flow
-
-import           GHC.Generics
 
 import           System.Posix.Files.ByteString
 
@@ -36,47 +31,72 @@ data IndexEntry =
              , uid :: Word32
              , gid :: Word32
              , size :: Word32
-             , hash :: Digest SHA1State
-             , fileName :: PaddedString
+             , hash :: ByteString
+             , fileName :: ByteString
              }
-  deriving stock (Eq, Show, Generic)
-  deriving anyclass (B.Binary)
+  deriving stock (Eq, Show)
 
-newtype PaddedString = Padded { raw :: L.ByteString }
-  deriving stock (Eq, Show, Ord)
-
-instance B.Binary PaddedString where
-  put (Padded bs) = do
-    B.put @Word16 $ fromIntegral $ L.length bs
-    B.putLazyByteString bs
-    B.putLazyByteString $ L.replicate padLength 0
+instance B.Serial IndexEntry where
+  serialize IndexEntry {..} = do
+    B.putWord32be ctimeSeconds
+    B.putWord32be ctimeNanosecondFraction
+    B.putWord32be mtimeSeconds
+    B.putWord32be mtimeNanosecondFraction
+    B.putWord32be dev
+    B.putWord32be ino
+    B.putWord32be mode
+    B.putWord32be uid
+    B.putWord32be gid
+    B.putWord32be size
+    B.putByteString hash
+    putFileName fileName
    where
-    padLength = 8 - ((L.length bs + 6) `mod` 8)
+    putFileName bs = do
+      B.putWord16be $ fromIntegral $ BS.length bs
+      B.putByteString bs
+      B.putByteString $ BS.replicate (padLength bs) 0
 
-  get = do
-    len <- B.get @Word16
-    let padLength = 8 - ((len + 6) `mod` 8)
-    -- trace (show len) $ return ()
-    -- trace (show padLength) $ return ()
-    bs <- B.getLazyByteString $ fromIntegral len
-    B.skip $ fromIntegral padLength
-    return $ Padded bs
+    padLength bs = 8 - ((BS.length bs + 6) `mod` 8)
 
-instance B.Binary Index where
-  put (Index entries) = do
+  deserialize = do
+    ctimeSeconds <- B.getWord32be
+    ctimeNanosecondFraction <- B.getWord32be
+    mtimeSeconds <- B.getWord32be
+    mtimeNanosecondFraction <- B.getWord32be
+    dev <- B.getWord32be
+    ino <- B.getWord32be
+    mode <- B.getWord32be
+    uid <- B.getWord32be
+    gid <- B.getWord32be
+    size <- B.getWord32be
+    hash <- B.getByteString 20
+    fileName <- getFileName
+    return IndexEntry {..}
+   where
+    getFileName = do
+      len <- B.getWord16be
+      let padLength = 8 - ((len + 6) `mod` 8)
+      -- trace (show len) $ return ()
+      -- trace (show padLength) $ return ()
+      bs <- B.getByteString $ fromIntegral len
+      B.skip $ fromIntegral padLength
+      return bs
+
+instance B.Serial Index where
+  serialize (Index entries) = do
     B.putLazyByteString "DIRC"
-    B.put @Word32 2
-    B.put @Word32 $ fromIntegral $ length entries
-    mapM_ B.put entries
+    B.putWord32be 2
+    B.putWord32be $ fromIntegral $ length entries
+    mapM_ B.serialize entries
 
-  get = do
+  deserialize = do
     B.skip 8
-    numEntries <- B.get @Word32
-    entries <- replicateM (fromIntegral numEntries) B.get
-    B.skip 20
+    numEntries <- B.getWord32be
+    entries <- replicateM (fromIntegral numEntries) B.deserialize
+    -- B.skip 20
     return $ Index entries
 
-constructIndexEntry :: L.ByteString -> Blob -> FileStatus -> IndexEntry
+constructIndexEntry :: ByteString -> Blob -> FileStatus -> IndexEntry
 constructIndexEntry path blob stat =
   IndexEntry { ctimeSeconds
              , ctimeNanosecondFraction = floor $ ctimeFraction * 1e9
@@ -90,7 +110,7 @@ constructIndexEntry path blob stat =
              , gid = fromIntegral $ fileGroup stat
              , size = fromIntegral $ fileSize stat
              , hash = blob.hash
-             , fileName = Padded path
+             , fileName = path
              }
  where
   (ctimeSeconds, ctimeFraction) = properFraction $ statusChangeTimeHiRes stat
@@ -118,13 +138,17 @@ getIndex :: IO Index
 getIndex = do
   exists <- fileExist ".git/index"
   if exists
-    then B.decodeFile ".git/index"
+    then do
+      result <- B.runGetS B.deserialize <$> BS.readFile ".git/index"
+      case result of
+        Left err    -> error err
+        Right index -> return index
     else return $ Index []
 
 writeIndex :: Index -> IO ()
 writeIndex index = do
-  let bytes = B.encode index
-  L.writeFile ".git/index" bytes
+  let bytes = B.runPutS $ B.serialize index
+  BS.writeFile ".git/index" bytes
 
 updateIndexWith :: [(FilePath, Blob)] -> IO ()
 updateIndexWith files = do

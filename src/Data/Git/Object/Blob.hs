@@ -2,28 +2,33 @@ module Data.Git.Object.Blob (createBlob, Blob(..), writeBlob) where
 
 import           Codec.Compression.Zlib
 
+import qualified Crypto.Hash.SHA1 as SHA1
+
+import qualified Data.ByteString as BS
+import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Builder as BB
-import qualified Data.ByteString.Lazy as L
-import           Data.Digest.Pure.SHA
+
+import           Flow
 
 import           System.Directory
 import           System.FilePath
 
-data Blob = Blob { content :: L.ByteString, hash :: Digest SHA1State }
+import           Text.Bytedump
+
+data Blob = Blob { content :: ByteString, hash :: ByteString }
   deriving (Eq)
 
 createBlob :: FilePath -> IO Blob
 createBlob path = do
-  content <- L.readFile path
+  content <- BS.readFile path
   let raw = rawBlob content
-  return $ Blob (compress raw) (sha1 raw)
+  return
+    $ Blob (raw |> BS.fromStrict |> compress |> BS.toStrict) (SHA1.hash raw)
 
-rawBlob :: L.ByteString -> L.ByteString
-rawBlob content = BB.toLazyByteString
-  $ "blob "
-  <> BB.int64Dec (L.length content)
-  <> "\0"
-  <> BB.lazyByteString content
+rawBlob :: ByteString -> ByteString
+rawBlob content = BS.toStrict
+  $ BB.toLazyByteString
+  $ "blob " <> BB.intDec (BS.length content) <> "\0" <> BB.byteString content
 
 writeBlob :: Blob -> IO ()
 writeBlob (Blob content hash) = do
@@ -32,8 +37,8 @@ writeBlob (Blob content hash) = do
     then return ()
     else do
       createDirectoryIfMissing True $ takeDirectory path
-      L.writeFile path content
+      BS.writeFile path content
  where
-  (h, t) = splitAt 2 $ show hash
+  (h, t) = splitAt 2 $ dumpRawBS hash
 
   path = ".git" </> "objects" </> h </> t

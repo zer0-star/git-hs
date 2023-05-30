@@ -22,8 +22,10 @@ dependencies:
   - base >= 4.7 && < 5
   - bytestring
   - zlib
-  - SHA
-  - binary
+  - cryptohash-sha1
+  - base16-bytestring
+  - bytedump
+  - bytes
   - mono-traversable
   - unix
   - time
@@ -33,7 +35,7 @@ dependencies:
   - directory
   - extra
 
-default-language: GHC2021
+language: GHC2021
 
 default-extensions:
   - BlockArguments
@@ -44,6 +46,7 @@ default-extensions:
   - NoFieldSelectors
   - DuplicateRecordFields
   - MultiWayIf
+  - RecordWildCards
 
 ghc-options:
   - -Wall
